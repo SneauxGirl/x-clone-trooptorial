@@ -8,6 +8,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import Link from "next/link";
 import { GiToaster } from "react-icons/gi";
+import Toast from "@/components/Toast";
 
 export const LoginPage = () => {
     const [email, setEmail] = useState<string>("testing@fakeemail.com"); //clear after testing
@@ -22,7 +23,7 @@ export const LoginPage = () => {
         try {
             await signInWithEmailAndPassword(auth, email, password);
             setShowToast(true);
-            router.push("/login");
+            router.push("/");
         } catch(error) {
             setError("Failed to login. Please check your email and password.");
         }
@@ -64,7 +65,7 @@ export const LoginPage = () => {
                     Don't have an account? <Link href="/signup">Sign up</Link>
                 </div>
                 {showToast && (
-                    <Toast //link once component is created
+                    <Toast
                     message="Successfully signed in"
                     onClose={() => setShowToast(false)}
                     />
