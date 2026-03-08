@@ -8,7 +8,7 @@ import MainContent from '../MainContent';
 const HomePage = () => {
     return (
         <div className={styles.container}>
-            <Sidebar avatarUrl={'https://randomuser.me/api/portraits/women/30.jpg'}/>
+            <Sidebar />
             <MainContent />
             <RightSidebar />
         </div>

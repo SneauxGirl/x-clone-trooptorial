@@ -29,61 +29,67 @@ import EmojiPicker from "emoji-picker-react";
 const MainContent = () => {
   const [tweets, setTweets] = useState<any[]>([]);
   const [newTweet, setNewTweet] = useState<string>("");
+  const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [activeMenu, setActiveMenu] = useState("For you");
   const [fullName, setFullName] = useState<string>("");
   const [username, setUsername] = useState<string>("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const { user } = useAuth();
+  const [userProfile, setUserProfile] = useState<any>(null);
 
-  // If user is logged in, use their avatar. Otherwise, use the FaUserCircle icon.
-  // In event of actual build: const avatarUrl = user ? user.photoURL : null;
-  const avatarUrl = user
-    ? "https://randomuser.me/api/portraits/women/30.jpg"
-    : null;
-
-  //FETCH USER DATA AND TWEETS
+  //FETCH USER DATA
   useEffect(() => {
+  if (user) {
+    const fetchProfile = async () => {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        setUserProfile(userDoc.data());
+        setFullName(userDoc.data().fullName);
+        setUsername(userDoc.data().username);
+      }
+    };
+    fetchProfile();
+  }
+}, [user]);
+
+useEffect(() => {
     const fetchTweets = async () => {
       try {
         const q = query(collection(db, "tweets"), orderBy("createdAt", "desc"));
         const querySnapshot = await getDocs(q);
-        const tweetsData = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-          const date = new Date(
-            data.createdAt.seconds * 1000 + data.createdAt.nanoseconds / 1000000
-          );
+        const tweetsData = await Promise.all(
+          querySnapshot.docs.map(async (document) => {
+            const data = document.data();
+            const date = new Date(
+              data.createdAt.seconds * 1000 +
+                data.createdAt.nanoseconds / 1000000
+            );
 
-          return {
-            id: doc.id,
-            ...data,
-            time: date.toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            }),
-          };
-        });
+            const userDoc = await getDoc(doc(db, "users", data.userId));
+            const userData = userDoc.exists() ? userDoc.data() : {};
+
+            return {
+              id: document.id,
+              ...data,
+              time: date.toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              }),
+              authorName: userData.fullName || "User",
+              authorHandle: userData.username || "guest",
+              authorAvatar: userData.photoURL || null,
+            };
+          })
+        );
         setTweets(tweetsData);
       } catch (error) {
         console.error("Error fetching tweets:", error);
       }
     };
 
-    const fetchUserData = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          setFullName(data.fullName);
-          setUsername(data.username);
-        }
-      }
-    };
-
     fetchTweets();
-    fetchUserData();
   }, []);
 
   const handleMenuClick = (menu: string) => {
@@ -92,6 +98,11 @@ const MainContent = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (newTweet.length > 280) {
+      setError("Tweet cannot exceed 280 characters");
+      return;
+    }
 
     if (newTweet.trim().length > 1 && user) {
       try {
@@ -112,6 +123,9 @@ const MainContent = () => {
             month: "long",
             day: "numeric",
           }),
+          authorName: fullName,
+          authorHandle: username,
+          authorAvatar: userProfile?.photoURL || null,
         };
 
         setTweets([newTweetData, ...tweets]);
@@ -151,29 +165,33 @@ const MainContent = () => {
       </div>
       <form onSubmit={handleSubmit} className={styles.tweetInput}>
         <div className={styles.inputContainer}>
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="User" className={styles.profileImage} />
+          {userProfile?.photoURL ? (
+            <img src={userProfile.photoURL} alt="User" className={styles.profileImage} />
           ) : (
             <FaUserCircle className={styles.profileIcon} /> // Use the default icon if user is not logged in
           )}
           <textarea
             placeholder="What is happening?!"
             value={newTweet}
-            onChange={(e) => setNewTweet(e.target.value)}
+            onChange={(e) => {
+              setNewTweet(e.target.value);
+              if (e.target.value.length <= 280) setError("");
+            }}
             className={styles.input}
             disabled={isSubmitting}
           />
-         {showEmojiPicker && (
-  <div className={styles.emojiPickerWrapper}>
-    <EmojiPicker
-      onEmojiClick={(emojiData) => {
-        setNewTweet(newTweet + emojiData.emoji);
-        setShowEmojiPicker(false);
-      }}
-    />
-  </div>
-)}
+          {showEmojiPicker && (
+            <div className={styles.emojiPickerWrapper}>
+              <EmojiPicker
+                onEmojiClick={(emojiData) => {
+                  setNewTweet(newTweet + emojiData.emoji);
+                  setShowEmojiPicker(false);
+                }}
+              />
+            </div>
+          )}
         </div>
+        {error && <p className={styles.error}>{error}</p>}
         <div className={styles.iconsContainer}>
           <FaImage className={styles.icon} />
           <FaSmile
@@ -185,10 +203,20 @@ const MainContent = () => {
           <FaMapMarkerAlt className={styles.icon} />
           <FaBold className={styles.icon} />
           <FaItalic className={styles.icon} />
+          <span
+            className={styles.charCount}
+            style={{ color: newTweet.length > 260 ? "#f4212e" : "#b0b3b8" }}
+          >
+            {280 - newTweet.length}
+          </span>
           <button
             type="submit"
             className={styles.postButton}
-            disabled={isSubmitting || newTweet.trim().length <= 1} // Disable if not typing
+            disabled={
+              isSubmitting ||
+              newTweet.trim().length <= 1 ||
+              newTweet.length > 280
+            } // Disable if not typing, cap at 280
           >
             {isSubmitting ? "Submitting..." : "Post"}
           </button>
@@ -201,9 +229,10 @@ const MainContent = () => {
             <div key={tweet.id} className={styles.tweet}>
               <Tweet
                 tweetId={tweet.id}
-                avatarUrl={avatarUrl || ""}
-                name={fullName}
-                handle={username}
+                userId={tweet.userId}
+                avatarUrl={tweet.authorAvatar}
+                name={tweet.authorName}
+                handle={tweet.authorHandle}
                 time={tweet.time}
                 content={tweet.content}
                 comments={tweet.comments}

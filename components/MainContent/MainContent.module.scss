@@ -15,7 +15,6 @@
 }
 
 .tweetInput {
-  //background-color: #1a1a1a;
   border-radius: 10px;
   padding: 10px 0;
 }
@@ -35,10 +34,11 @@
 }
 
 .profileImage {
-  width: 50px;
-  height: 50px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   margin: 0 15px;
+  object-fit: cover;
 }
 
 .input {
@@ -79,6 +79,11 @@
   &:hover {
     color: #1991da;
   }
+}
+
+.charCount {
+  font-size: 14px;
+  margin-left: auto; // pushes it to the right, next to Post button
 }
 
 .postButton {
@@ -176,12 +181,7 @@
   padding: 40px;
 }
 
-.inputContainer {
-  display: flex;
-  align-items: center;
-}
-
-.profileImage {
+.profileImageTweet {
   width: 48px;
   height: 48px;
   border-radius: 50%;

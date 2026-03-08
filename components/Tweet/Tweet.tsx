@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import styles from './Tweet.module.scss'
+import { useAuth } from '@/context/AuthContext';
+import styles from './Tweet.module.scss';
 import { db } from '@/lib/firebaseConfig';
 import { deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { FiMoreHorizontal } from 'react-icons/fi';
 import { PiSealCheckFill } from 'react-icons/pi';
-import { FaRegComment, FaRetweet, FaHeart, FaRegHeart, FaChartBar, FaShare, FaTrash } from 'react-icons/fa';
+import { FaRegComment, FaRetweet, FaHeart, FaRegHeart, FaChartBar, FaShare, FaTrash, FaUserCircle } from 'react-icons/fa';
 
 interface TweetProps {
   tweetId: string;
-  avatarUrl: string;
+  userId: string;
+  avatarUrl: string | null;
   name: string;
   handle: string;
   time: string;
@@ -21,6 +23,7 @@ interface TweetProps {
 
 export const Tweet = ({
   tweetId,
+  userId,
   avatarUrl,
   name,
   handle,
@@ -36,6 +39,7 @@ export const Tweet = ({
   const [likeCount, setLikeCount] = useState(Math.floor((Math.floor(Math.random() * 13010 + 1000) / 16)) * 16);
   const [isLiked, setIsLiked] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const { user } = useAuth();
 
 const handleMenuToggle = () => setShowMenu(!showMenu);
 
@@ -104,7 +108,11 @@ const [engagmentNum, setEngagementNum] = useState(baseEngagement);
 
     return (
     <div className={styles.tweet}>
+      {avatarUrl ? (
       <img src={avatarUrl} alt={`${name}'s avatar`} className={styles.avatar} />
+      ) : (
+        <FaUserCircle className={styles.avatar} />
+      )}
       <div className={styles.tweetContent}>
         <div className={styles.header}>
           <span className={styles.name}>{name}</span>
@@ -112,11 +120,13 @@ const [engagmentNum, setEngagementNum] = useState(baseEngagement);
             @{handle} <PiSealCheckFill className={styles.verifiedIcon} />
           </span>
           <span className={styles.time}> · {time}</span>
+          {user?.uid === userId && (
           <FiMoreHorizontal
             className={styles.moreIcon}
             onClick={handleMenuToggle}
           />
-          {showMenu && (
+          )}
+          {user?.uid === userId && showMenu && (
             <div className={styles.menu}>
                 {/*Functional*/}
               <div onClick={handleDelete} className={`${styles.menuItem} ${styles.redMenuItem}`}>

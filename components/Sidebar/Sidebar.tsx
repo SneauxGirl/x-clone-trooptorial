@@ -12,38 +12,49 @@ import {
   HiOutlineSearch,
 } from "react-icons/hi";
 import { PiSealCheck, PiSealCheckFill, PiXLogoBold } from "react-icons/pi";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebaseConfig";
+import { auth, db } from "@/lib/firebaseConfig";
+import { FaUserCircle } from "react-icons/fa";
+import { getDoc, doc } from "firebase/firestore";
 
-interface SidebarProps {
-  avatarUrl: string;
-}
-
-const Sidebar = ({ avatarUrl }: SidebarProps) => {
+const Sidebar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const { user } = useAuth();
-  const router = useRouter();
+const [userProfile, setUserProfile] = useState<any>(null);
+const router = useRouter();
 
+useEffect(() => {
+  if (user) {
+    const fetchProfile = async () => {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        console.log("sidebar userProfile:", userDoc.data());
+        setUserProfile(userDoc.data());
+      }
+    };
+    fetchProfile();
+  }
+}, [user]);
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
   const handleSignOut = async () => {
     try {
-        await signOut(auth);
-        setShowToast(true);
-        setTimeout(() => {
-            setShowToast(false);
-            router.push("./login");
-        }, 2000);
+      await signOut(auth);
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+        router.push("./login");
+      }, 2000);
     } catch (error) {
-        console.error("Failed to sign out:", error);
+      console.error("Failed to sign out:", error);
     }
-  }
+  };
 
   return (
     <div className={styles.sidebar}>
@@ -103,19 +114,23 @@ const Sidebar = ({ avatarUrl }: SidebarProps) => {
           <span className={styles.postText}>Post</span>
         </button>
       </div>
-    {
-        user ? (
-            <div className={styles.miniProfile} onClick={toggleMenu}>
-                <img src={avatarUrl} alt="User" className={styles.avatar} />
-            <div className={styles.profileDetails}>
-                <span className={styles.name}>
-                    {user.displayName || "User"}{" "}
-                    <PiSealCheckFill className={styles.verifiedIcon}/>
-                </span>
-                <span className={styles.username}>
-                    @{user.displayName || "guest"} {/*keep lower case: User @guest display*/}
-                </span>
-            </div>
+      {user ? (
+        <div className={styles.miniProfile} onClick={toggleMenu}>
+          {userProfile?.photoURL ? (
+            <img src={userProfile.photoURL} alt="User" className={styles.avatar} />
+          ) : (
+            <FaUserCircle className={styles.avatar} />
+          )}
+          <div className={styles.profileDetails}>
+            <span className={styles.name}>
+              {user.displayName || "User"}{" "}
+              <PiSealCheckFill className={styles.verifiedIcon} />
+            </span>
+            <span className={styles.username}>
+              @{user.displayName || "guest"}{" "}
+              {/*keep lower case: User @guest display*/}
+            </span>
+          </div>
           <FiMoreHorizontal className={styles.moreIcon} />
           {isMenuOpen && (
             <div className={styles.profileMenu}>
@@ -124,16 +139,16 @@ const Sidebar = ({ avatarUrl }: SidebarProps) => {
               </div>
             </div>
           )}
-            </div>
-        ) : (
-            <button onClick={handleSignOut} className={styles.loginButton}>
+        </div>
+      ) : (
+        <button onClick={handleSignOut} className={styles.loginButton}>
           Log in
         </button>
-        )}
+      )}
 
-        {showToast && <div className={styles.toast}>Signed out successfully</div>}
+      {showToast && <div className={styles.toast}>Signed out successfully</div>}
     </div>
   );
-}
+};
 
 export default Sidebar;
