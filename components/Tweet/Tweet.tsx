@@ -35,8 +35,8 @@ export const Tweet = ({
   onDelete,
 }: TweetProps) => {
   const [commentCount, setCommentCount] = useState(comments || 0);
-  const [retweetCount, setRetweetCount] = useState(Math.floor((Math.floor(Math.random() * 13010 + 1000) / 4)) * 4);
-  const [likeCount, setLikeCount] = useState(Math.floor((Math.floor(Math.random() * 13010 + 1000) / 16)) * 16);
+  const [retweetCount, setRetweetCount] = useState(retweets || 0 + Math.floor((Math.floor(Math.random() * 13010 + 1000) / 4)) * 4);
+  const [likeCount, setLikeCount] = useState(likes || 0 + Math.floor((Math.floor(Math.random() * 13010 + 1000) / 16)) * 16);
   const [isLiked, setIsLiked] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const { user } = useAuth();

@@ -41,7 +41,7 @@ const RightSidebar = () => {
                     <div className={styles.trendInfo}>
                     <span>FutureTech · 2 hours ago</span>
                     <h3>
-                        Internet Explorer: the vibe code revival
+                        Internet Explorer: a vibe code revival?
                     </h3>
                     </div>
                 </li>

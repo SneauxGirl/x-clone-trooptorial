@@ -57,7 +57,7 @@ export const LoginPage = () => {
         <form onSubmit={handleLogin} className={styles.form}>
           <input
             type="text"
-            placeholder="Phone, email address, or username"
+            placeholder="Phone, email address or username"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className={styles.input}

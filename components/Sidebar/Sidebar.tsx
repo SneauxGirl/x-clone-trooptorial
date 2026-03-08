@@ -49,7 +49,7 @@ useEffect(() => {
       setShowToast(true);
       setTimeout(() => {
         setShowToast(false);
-        router.push("./login");
+        router.push("/login");
       }, 2000);
     } catch (error) {
       console.error("Failed to sign out:", error);
@@ -123,11 +123,11 @@ useEffect(() => {
           )}
           <div className={styles.profileDetails}>
             <span className={styles.name}>
-              {user.displayName || "User"}{" "}
+              {userProfile?.fullName || "User"}{" "}
               <PiSealCheckFill className={styles.verifiedIcon} />
             </span>
             <span className={styles.username}>
-              @{user.displayName || "guest"}{" "}
+              @{userProfile?.username || "guest"}{" "}
               {/*keep lower case: User @guest display*/}
             </span>
           </div>
@@ -135,13 +135,13 @@ useEffect(() => {
           {isMenuOpen && (
             <div className={styles.profileMenu}>
               <div className={styles.profileMenuItem} onClick={handleSignOut}>
-                Log out @{user.displayName || "guest"}
+                Log out @{userProfile?.username || "guest"}
               </div>
             </div>
           )}
         </div>
       ) : (
-        <button onClick={handleSignOut} className={styles.loginButton}>
+        <button onClick={() => router.push("./login")} className={styles.loginButton}>
           Log in
         </button>
       )}
