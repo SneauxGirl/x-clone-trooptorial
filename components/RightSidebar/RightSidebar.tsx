@@ -41,7 +41,7 @@ const RightSidebar = () => {
                     <div className={styles.trendInfo}>
                     <span>FutureTech · 2 hours ago</span>
                     <h3>
-                        Can we eradicate time zones?
+                        Internet Explorer: the vibe code revival
                     </h3>
                     </div>
                 </li>

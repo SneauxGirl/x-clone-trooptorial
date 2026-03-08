@@ -110,7 +110,7 @@ const Sidebar = ({ avatarUrl }: SidebarProps) => {
             <div className={styles.profileDetails}>
                 <span className={styles.name}>
                     {user.displayName || "User"}{" "}
-                    <PiSealCheckFill className={styles.verificationIcon}/>
+                    <PiSealCheckFill className={styles.verifiedIcon}/>
                 </span>
                 <span className={styles.username}>
                     @{user.displayName || "guest"} {/*keep lower case: User @guest display*/}
