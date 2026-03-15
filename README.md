@@ -2,8 +2,7 @@
 
 A full-stack X (formerly Twitter) clone built with Next.js, TypeScript, Firebase, and SCSS.
 
-![X-Clone Screenshot](public/x-clone.png)
-
+![X-Clone Screenshot](images/x-clone.png)
 
 🔗 **Live Demo:** [x-clone-trooptorial.vercel.app](https://x-clone-trooptorial.vercel.app)
 - Test account preloaded for login, or signup (@fakeemail.com) to create your own user and add to the fun!
