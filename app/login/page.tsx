@@ -12,8 +12,8 @@ import Toast from "@/components/Toast";
 import { collection, query, where, getDocs } from "firebase/firestore";
 
 export const LoginPage = () => {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [email, setEmail] = useState<string>("testing123@fakemail.com");
+  const [password, setPassword] = useState<string>("testing123");
   const [error, setError] = useState<string | null>(null);
   const [showToast, setShowToast] = useState<boolean>(false);
   const router = useRouter();
